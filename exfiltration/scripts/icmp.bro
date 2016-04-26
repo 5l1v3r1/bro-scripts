@@ -26,8 +26,8 @@ function check_icmp(c:connection)
 	if (c$id$resp_h in Site::local_nets) return;
 
 	SumStats::observe("Messages",
-						SumStats::Key($host=c$id$orig_h),
-						SumStats::Observation($num=1));
+	                  SumStats::Key($host=c$id$orig_h),
+	                  SumStats::Observation($num=1));
 	}
 
 event icmp_sent(c: connection, icmp: icmp_conn)
@@ -102,23 +102,24 @@ event icmp_time_exceeded(c: connection, icmp: icmp_conn, code: count, context: i
 event bro_init()
 	{
 	local messages_reducer = SumStats::Reducer($stream="Messages",
-								 $apply=set(SumStats::SUM));
+	                                           $apply=set(SumStats::SUM));
 
 	SumStats::create([$name = "messages",
-						$epoch = icmp_interval,
-						$reducers = set(messages_reducer),
-						$threshold = icmp_per_query_interval,
-						$threshold_val(key: SumStats::Key, result: SumStats::Result) =
-						{
-						return result["Messages"]$sum;
-						},
-						$threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
-						{
-						local dur = Human::interval_to_human_string(query_interval);
-						NOTICE([$note=ICMP_Velocity,
-							$src=key$host,
-							$msg=fmt("%s sent %s/%s ICMP messages in %s", key$host, result["Messages"]$sum, icmp_per_query_interval, dur),
-							$suppress_for=30mins,
-							$identifier=cat(key$host)]);
-						}]);
+	                 $epoch = icmp_interval,
+	                 $reducers = set(messages_reducer),
+	                 $threshold = icmp_per_query_interval,
+	                 $threshold_val(key: SumStats::Key, result: SumStats::Result) =
+		                 {
+		                 return result["Messages"]$sum;
+		                 },
+	                 $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
+		                 {
+		                 local dur = Human::interval_to_human_string(query_interval);
+		                 NOTICE([$note=ICMP_Velocity,
+		                         $src=key$host,
+		                         $msg=fmt("%s sent %s/%s ICMP messages in %s", key$host, result["Messages"]$sum, icmp_per_query_interval, dur),
+		                         $suppress_for=30mins,
+		                         $identifier=cat(key$host)]);
+		                 }
+	                ]);
 	}

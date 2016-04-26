@@ -101,12 +101,12 @@ function handle_flow_exception(c: connection, reverse_lookup_hostname: string)
 	if (large_flow_count_by_receiver[c$id$resp_h] >= count_of_tracked_flows_to_notice)
 		{
 		NOTICE([$note=Multiple_Flows,
-				$msg=fmt("%s has received %s uploads greater than %s from internal hosts over the past %s.",
-						c$id$resp_h, large_flow_count_by_receiver[c$id$resp_h], bytes_sent, duration),
-				$sub=sub_message,
-				$conn=c,
-				$suppress_for=flow_suppression_interval,
-				$identifier=cat(c$id$resp_h)]);
+		        $msg=fmt("%s has received %s uploads greater than %s from internal hosts over the past %s.",
+		                  c$id$resp_h, large_flow_count_by_receiver[c$id$resp_h], bytes_sent, duration),
+		        $sub=sub_message,
+		        $conn=c,
+		        $suppress_for=flow_suppression_interval,
+		        $identifier=cat(c$id$resp_h)]);
 		}
 
 	# Count how many large uploads originated from this host
@@ -115,12 +115,12 @@ function handle_flow_exception(c: connection, reverse_lookup_hostname: string)
 	if (large_flow_count_by_sender[c$id$orig_h] >= count_of_tracked_flows_to_notice)
 		{
 		NOTICE([$note=Multiple_Flows,
-				$msg=fmt("%s has sent %s uploads greater than %s over the past %s",
-						c$id$orig_h, large_flow_count_by_sender[c$id$orig_h], bytes_sent, duration),
-				$sub=sub_message,
-				$conn=c,
-				$suppress_for=flow_suppression_interval,
-				$identifier=cat(c$id$orig_h)]);
+		        $msg=fmt("%s has sent %s uploads greater than %s over the past %s",
+		                  c$id$orig_h, large_flow_count_by_sender[c$id$orig_h], bytes_sent, duration),
+		        $sub=sub_message,
+		        $conn=c,
+		        $suppress_for=flow_suppression_interval,
+		        $identifier=cat(c$id$orig_h)]);
 		}
 
 	# if num_bytes sent over threshold
@@ -129,23 +129,23 @@ function handle_flow_exception(c: connection, reverse_lookup_hostname: string)
 	if (c$orig$num_bytes_ip > flow_bytes_tx_to_notice && flow_pcr > min_flow_producer_consumer_ratio)
 		{
 		NOTICE([$note=Large_Flow,
-				$msg=fmt("%s:%s sent %s to %s (%s:%s) over %s in %s, while receiving %s.",
-						c$id$orig_h, c$id$orig_p, bytes_sent, reverse_lookup_hostname, c$id$resp_h, c$id$resp_p, duration, c$uid, bytes_received),
-				$sub=sub_message,
-				$conn=c,
-				$suppress_for=480min,
-				$identifier=cat(c$id$orig_h, " -> ", c$id$resp_h, ":", c$id$resp_p)]);
+		        $msg=fmt("%s:%s sent %s to %s (%s:%s) over %s in %s, while receiving %s.",
+		                  c$id$orig_h, c$id$orig_p, bytes_sent, reverse_lookup_hostname, c$id$resp_h, c$id$resp_p, duration, c$uid, bytes_received),
+		        $sub=sub_message,
+		        $conn=c,
+		        $suppress_for=480min,
+		        $identifier=cat(c$id$orig_h, " -> ", c$id$resp_h, ":", c$id$resp_p)]);
 		}
 	else
 		{
 		# raise notice msg and format the time stamp for the sub message so that it is human readable
 		NOTICE([$note=Flow,
-				$msg=fmt("%s:%s sent %s to %s (%s:%s) over %s in %s, while receiving %s.",
-						c$id$orig_h, c$id$orig_p, bytes_sent, reverse_lookup_hostname, c$id$resp_h, c$id$resp_p, duration, c$uid, bytes_received),
-				$sub=sub_message,
-				$conn=c,
-				$suppress_for=480min,
-				$identifier=cat(c$id$orig_h, ":", c$id$orig_p, " -> ", c$id$resp_h, ":", c$id$resp_p)]);
+		        $msg=fmt("%s:%s sent %s to %s (%s:%s) over %s in %s, while receiving %s.",
+		                  c$id$orig_h, c$id$orig_p, bytes_sent, reverse_lookup_hostname, c$id$resp_h, c$id$resp_p, duration, c$uid, bytes_received),
+		        $sub=sub_message,
+		        $conn=c,
+		        $suppress_for=480min,
+		        $identifier=cat(c$id$orig_h, ":", c$id$orig_p, " -> ", c$id$resp_h, ":", c$id$resp_p)]);
 		}
 	}
 

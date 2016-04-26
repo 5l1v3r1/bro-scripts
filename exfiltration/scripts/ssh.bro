@@ -33,12 +33,12 @@ function handle_ssh_execption(c: connection)
 	when (local reverse_lookup_hostname = lookup_addr(c$id$resp_h))
 		{
 		NOTICE([$note=SSH,
-				$msg=fmt("%s has connected to %s:%s (%s) using SSH",
-						 c$id$orig_h, c$id$resp_h, c$id$resp_p, reverse_lookup_hostname),
-				$conn=c,
-				$sub=sub_message,
-				$suppress_for=1day,
-				$identifier=cat(c$id$orig_h, " -> ", c$id$resp_h, ":", c$id$resp_p)]);
+		        $msg=fmt("%s has connected to %s:%s (%s) using SSH",
+		                  c$id$orig_h, c$id$resp_h, c$id$resp_p, reverse_lookup_hostname),
+		        $conn=c,
+		        $sub=sub_message,
+		        $suppress_for=1day,
+		        $identifier=cat(c$id$orig_h, " -> ", c$id$resp_h, ":", c$id$resp_p)]);
 		}
 	}
 

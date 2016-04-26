@@ -80,12 +80,12 @@ function x509_subject_common_name(distinguished_name: string): string
 	const match_common_name: pattern = /CN=(.*?),/;
 	local extracted_common_name = match_pattern(distinguished_name, match_common_name);
 	if (extracted_common_name$matched)
-	  {
-	  const extract_common_name: pattern = /\.[^,]*/;
-	  local extracted_common_name_domain = match_pattern(extracted_common_name$str, extract_common_name);
-	  if (extracted_common_name_domain$matched)
-		return extracted_common_name_domain$str;
-	  }
+		{
+		const extract_common_name: pattern = /\.[^,]*/;
+		local extracted_common_name_domain = match_pattern(extracted_common_name$str, extract_common_name);
+		if (extracted_common_name_domain$matched)
+			return extracted_common_name_domain$str;
+		}
 	else
-	  return "no_match";
+		return "no_match";
 	}

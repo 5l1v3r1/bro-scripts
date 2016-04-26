@@ -34,11 +34,11 @@ event bro_init()
 	local mac_addresses_path = fmt(file_of_mac_addresses);
 	Reporter::info(fmt("Loading MAC addresses to be on the lookout for:  %s...", mac_addresses_path));
 	Input::add_table([$source=mac_addresses_path,
-		$name="mac_address_stream",
-		$idx=IdxMac,
-		$val=BoloAttributes,
-		$destination=Bolo::mac_addresses,
-		$mode=Input::REREAD]);
+	                  $name="mac_address_stream",
+	                  $idx=IdxMac,
+	                  $val=BoloAttributes,
+	                  $destination=Bolo::mac_addresses,
+	                  $mode=Input::REREAD]);
 	}
 
 event dhcp_request(c: connection, msg: dhcp_msg, req_addr: addr, serv_addr: addr, host_name: string)
@@ -48,9 +48,9 @@ event dhcp_request(c: connection, msg: dhcp_msg, req_addr: addr, serv_addr: addr
 	
 	if ( msg$h_addr in mac_addresses )
 		NOTICE([$note=MAC_Seen_In_DHCP_Request,
-				$msg=fmt("BOLO: %s spotted: %s (%s) has just requested a DHCP lease for %s.", 
-						 mac_addresses[msg$h_addr], msg$h_addr, host_name, req_addr),
-				$conn=c,
-				$suppress_for=1day,
-				$identifier=cat(msg$h_addr)]);
+		        $msg=fmt("BOLO: %s spotted: %s (%s) has just requested a DHCP lease for %s.", 
+		                  mac_addresses[msg$h_addr], msg$h_addr, host_name, req_addr),
+		        $conn=c,
+		        $suppress_for=1day,
+		        $identifier=cat(msg$h_addr)]);
 	}

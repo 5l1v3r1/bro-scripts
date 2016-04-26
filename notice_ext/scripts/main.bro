@@ -27,8 +27,7 @@ export {
 	##
 	## dest: recipient string to use for the mail.
 	##
-	## Returns: a string of mail headers to which an email body can be
-	##		  appended.
+	## Returns: a string of mail headers to which an email body can be appended
 	global email_headers_ext: function(subject_notice: string, subject_desc: string, dest: string): string;
 
 	## Call this function to send a notice in an email with a custom and additional body content
@@ -37,8 +36,7 @@ export {
 	##
 	## dest: The intended recipient of the notice email.
 	##
-	## extend: Whether to extend the email using the
-	##		 ``email_body_sections`` field of *n*.
+	## extend: Whether to extend the email using the ``email_body_sections`` field of *n*.
 	global email_notice_to_ext: function(n: Notice::Info, dest: string, extend: bool);
 
 	## Emailed notice types.

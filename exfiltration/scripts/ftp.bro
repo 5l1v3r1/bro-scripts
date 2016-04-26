@@ -17,11 +17,11 @@ function handle_ftp_exception(c: connection)
 	when (local reverse_lookup_hostname = lookup_addr(c$id$resp_h))
 		{
 		NOTICE([$note=FTP_Upload,
-				$msg=fmt("%s has used FTP to send files to %s (%s:%s)",
-				c$id$orig_h, reverse_lookup_hostname, c$id$resp_h, c$id$resp_p),
-				$conn=c,
-				$suppress_for=4hr,
-				$identifier=cat(c$id$orig_h," -> ", c$id$resp_h)]);
+		        $msg=fmt("%s has used FTP to send files to %s (%s:%s)",
+		                  c$id$orig_h, reverse_lookup_hostname, c$id$resp_h, c$id$resp_p),
+		        $conn=c,
+		        $suppress_for=4hr,
+		        $identifier=cat(c$id$orig_h," -> ", c$id$resp_h)]);
 		}
 	}
 

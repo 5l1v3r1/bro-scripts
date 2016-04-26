@@ -36,7 +36,7 @@ export {
 	## Context notices provide both superssion justification and a record of important 
 	## knowns about flows.
 	redef enum Notice::Type += {
-			Context,
+		Context,
 	};
 
 	## Hostname and Subnet whitelists can be loaded by the input framework.
@@ -64,8 +64,8 @@ export {
 function provide_context(c: connection, meta: string)
 	{
 	NOTICE([$note=Context,
-			$msg=meta,
-			$conn=c]);
+	        $msg=meta,
+	        $conn=c]);
 	}
 
 # Notice context so that connections can be annotated even when a full
@@ -73,8 +73,8 @@ function provide_context(c: connection, meta: string)
 function provide_connectionless_context(id: conn_id, meta: string)
 	{
 	NOTICE([$note=Context,
-			$msg=meta,
-			$id=id]);
+	        $msg=meta,
+	        $id=id]);
 	}
 
 event bro_init()
@@ -91,22 +91,22 @@ event bro_init()
 	local whitelist_path = fmt(file_of_whitelisted_subnets);
 	Reporter::info(fmt("Loading subnet whitelists from %s...",whitelist_path));
 	Input::add_table([$source=whitelist_path,
-		$name="whitelist_subnet_stream",
-		$idx=IdxNet,
-		$val=WhitelistAttributes,
-		$destination=Exfiltration::whitelisted_subnets,
-		$mode=Input::REREAD]);
+	                  $name="whitelist_subnet_stream",
+	                  $idx=IdxNet,
+	                  $val=WhitelistAttributes,
+	                  $destination=Exfiltration::whitelisted_subnets,
+	                  $mode=Input::REREAD]);
 
 	# Load and watch the file of whitelisted hostnames so that it can be
 	# updated without restarting Bro.
 	whitelist_path = fmt(file_of_whitelisted_hostnames);
 	Reporter::info(fmt("Loading hostname whitelists from %s...",whitelist_path));
 	Input::add_table([$source=whitelist_path,
-		$name="whitelist_hostname_stream",
-		$idx=IdxName,
-		$val=WhitelistAttributes,
-		$destination=Exfiltration::whitelisted_hostnames,
-		$mode=Input::REREAD]);
+	                  $name="whitelist_hostname_stream",
+	                  $idx=IdxName,
+	                  $val=WhitelistAttributes,
+	                  $destination=Exfiltration::whitelisted_hostnames,
+	                  $mode=Input::REREAD]);
 	}
 
 event Input::end_of_data(name: string, source:string)
@@ -120,14 +120,14 @@ function x509_subject_common_name(distinguished_name: string): string
 	const match_common_name: pattern = /CN=(.*?),/;
 	local extracted_common_name = match_pattern(distinguished_name, match_common_name);
 	if (extracted_common_name$matched)
-	  {
-	  const extract_common_name: pattern = /\.[^,]*/;
-	  local extracted_common_name_domain = match_pattern(extracted_common_name$str, extract_common_name);
-	  if (extracted_common_name_domain$matched)
-		return extracted_common_name_domain$str;
-	  }
+		{
+		const extract_common_name: pattern = /\.[^,]*/;
+		local extracted_common_name_domain = match_pattern(extracted_common_name$str, extract_common_name);
+		if (extracted_common_name_domain$matched)
+			return extracted_common_name_domain$str;
+		}
 	else
-	  return "no_match";
+		return "no_match";
 	}
 
 ## Whitelist context does not assert an identity relationship to observables and knowns.
@@ -173,9 +173,9 @@ function whitelisted_address_by_subnet(a: addr): bool
 			{
 			if (a in whitelisted_subnet)
 				meta += fmt("%s -> %s: %s ",
-							a,
-							whitelisted_subnet,
-							whitelisted_subnets[whitelisted_subnet]$comment);
+				             a,
+				             whitelisted_subnet,
+				             whitelisted_subnets[whitelisted_subnet]$comment);
 			}
 		return T;
 		}
@@ -194,9 +194,9 @@ function whitelisted_connection_by_subnet(c: connection): bool
 			{
 			if (c$id$resp_h in whitelisted_subnet)
 				meta += fmt("%s -> %s: %s",
-							c$id$resp_h,
-							whitelisted_subnet,
-							whitelisted_subnets[whitelisted_subnet]$comment);
+				             c$id$resp_h,
+				             whitelisted_subnet,
+				             whitelisted_subnets[whitelisted_subnet]$comment);
 			}
 		provide_context(c, meta);
 		return T;

@@ -71,28 +71,28 @@ event DNS::connection_state_remove(c: connection) &priority=5
 
 	# Sumstat all queries per origin
 	SumStats::observe("Queries",
-					  SumStats::Key($host=c$id$orig_h),
-					  SumStats::Observation($str=c$dns$query));
+	                   SumStats::Key($host=c$id$orig_h),
+	                   SumStats::Observation($str=c$dns$query));
 
 	# Sumstat all query lengths per origin
 	SumStats::observe("Query Length",
-					  SumStats::Key($host=c$id$orig_h),
-					  SumStats::Observation($num=|c$dns$query|));
+	                   SumStats::Key($host=c$id$orig_h),
+	                   SumStats::Observation($num=|c$dns$query|));
 
 	# Sumstat TXT query answers by origin
 	if (c$dns$qtype_name == "TXT")
 		{
 		SumStats::observe("TXT Answers",
-						  SumStats::Key($host=c$id$orig_h),
-						  SumStats::Observation($str=join_string_vec(c$dns$answers, "\t\t")));
+		                   SumStats::Key($host=c$id$orig_h),
+		                   SumStats::Observation($str=join_string_vec(c$dns$answers, "\t\t")));
 		}
 
 	# Sumstat NULL query answers by origin
 	if (c$dns$qtype_name == "NULL")
 		{
 		SumStats::observe("NULL Answers",
-						  SumStats::Key($host=c$id$orig_h),
-						  SumStats::Observation($str=join_string_vec(c$dns$answers, "\t\t")));
+		                   SumStats::Key($host=c$id$orig_h),
+		                   SumStats::Observation($str=join_string_vec(c$dns$answers, "\t\t")));
 		}
 	}
 
@@ -107,85 +107,88 @@ event bro_init()
 
 	# Notice too many unique queries
 	SumStats::create([$name = "queries",
-					  $epoch = query_interval,
-					  $reducers = set(queries_reducer),
-					  $threshold = queries_per_query_interval,
-					  $threshold_val(key: SumStats::Key, result: SumStats::Result) =
-						{
-						return result["Queries"]$sum;
-						},
-					  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
-						{
-						local dur = Human::interval_to_human_string(query_interval);
-						Reporter::info(fmt("%s sent %d DNS queries in %s", key$host, result["Queries"]$sum, dur));
-						NOTICE([$note=DNS_Excessive_Query_Velocity,
-							   $src=key$host,
-							   $msg=fmt("%s sent %d DNS queries in %s", key$host, result["Queries"]$sum, dur),
-							   $suppress_for=1mins,
-							   $identifier=cat(key$host)]);
-						}]);
+	                  $epoch = query_interval,
+	                  $reducers = set(queries_reducer),
+	                  $threshold = queries_per_query_interval,
+	                  $threshold_val(key: SumStats::Key, result: SumStats::Result) =
+		                {
+		                return result["Queries"]$sum;
+		                },
+	                  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
+		                {
+		                local dur = Human::interval_to_human_string(query_interval);
+		                Reporter::info(fmt("%s sent %d DNS queries in %s", key$host, result["Queries"]$sum, dur));
+		                NOTICE([$note=DNS_Excessive_Query_Velocity,
+		                        $src=key$host,
+		                        $msg=fmt("%s sent %d DNS queries in %s", key$host, result["Queries"]$sum, dur),
+		                        $suppress_for=1mins,
+		                        $identifier=cat(key$host)]);
+		                }
+	                ]);
 
 	# Notice too much data stuffed into queries
 	SumStats::create([$name = "query_length",
-					  $epoch = query_interval,
-					  $reducers = set(query_length_reducer),
-					  $threshold = query_length_sum_per_interval,
-					  $threshold_val(key: SumStats::Key, result: SumStats::Result) =
-						{
-						return result["Query Length"]$sum;
-						},
-					  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
-						{
-						local dur = Human::interval_to_human_string(query_interval);
-						Reporter::info(fmt("%s sent %f characters of DNS queries in %s", key$host, result["Query Length"]$sum, dur));
-						NOTICE([$note=DNS_Excessive_Query_Length,
-							   $src=key$host,
-							   $msg=fmt("%s sent %f characters of DNS queries in %s", key$host, result["Query Length"]$sum, dur),
-							   $suppress_for=1mins,
-							   $identifier=cat(key$host)]);
-						}]);
+	                  $epoch = query_interval,
+	                  $reducers = set(query_length_reducer),
+	                  $threshold = query_length_sum_per_interval,
+	                  $threshold_val(key: SumStats::Key, result: SumStats::Result) =
+		                {
+		                return result["Query Length"]$sum;
+		                },
+	                  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
+		                {
+		                local dur = Human::interval_to_human_string(query_interval);
+		                Reporter::info(fmt("%s sent %f characters of DNS queries in %s", key$host, result["Query Length"]$sum, dur));
+		                NOTICE([$note=DNS_Excessive_Query_Length,
+		                        $src=key$host,
+		                        $msg=fmt("%s sent %f characters of DNS queries in %s", key$host, result["Query Length"]$sum, dur),
+		                        $suppress_for=1mins,
+		                        $identifier=cat(key$host)]);
+		                }
+	                ]);
 
 	# Notice too many TXT queries
 	SumStats::create([$name = "txt",
-					  $epoch = query_interval,
-					  $reducers = set(txt_reducer),
-					  $threshold = txt_answer_types_per_interval,
-					  $threshold_val(key: SumStats::Key, result: SumStats::Result) =
-						{
-						return result["TXT Answers"]$unique+0.0;
-						},
-					  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
-						{
-						local dur = Human::interval_to_human_string(query_interval);
-						Reporter::info(fmt("%s received %d unique TXT answers to DNS queries against zones we don't whitelist in %s",
-									   key$host,result["TXT Answers"]$unique, dur));
-						NOTICE([$note=DNS_too_many_TXT_Answers,
-							   $src=key$host,
-							   $msg=fmt("%s received %d unique TXT answers to DNS queries against zones we don't whitelist in %s",
-										key$host, result["TXT Answers"]$unique, dur),
-							   $suppress_for=1mins,
-							   $identifier=cat(key$host)]);
-						}]);
+	                  $epoch = query_interval,
+	                  $reducers = set(txt_reducer),
+	                  $threshold = txt_answer_types_per_interval,
+	                  $threshold_val(key: SumStats::Key, result: SumStats::Result) =
+		                {
+		                return result["TXT Answers"]$unique+0.0;
+		                },
+	                  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
+		                {
+		                local dur = Human::interval_to_human_string(query_interval);
+		                Reporter::info(fmt("%s received %d unique TXT answers to DNS queries against zones we don't whitelist in %s",
+		                                    key$host,result["TXT Answers"]$unique, dur));
+		                NOTICE([$note=DNS_too_many_TXT_Answers,
+		                        $src=key$host,
+		                        $msg=fmt("%s received %d unique TXT answers to DNS queries against zones we don't whitelist in %s",
+		                                  key$host, result["TXT Answers"]$unique, dur),
+		                        $suppress_for=1mins,
+		                        $identifier=cat(key$host)]);
+		                }
+	                ]);
 
 	# Notice too many NULL queries
 	SumStats::create([$name = "null",
-					  $epoch = query_interval,
-					  $reducers = set(null_reducer),
-					  $threshold = null_answer_types_per_interval,
-					  $threshold_val(key: SumStats::Key, result: SumStats::Result) =
-						{
-						return result["NULL Answers"]$unique+0.0;
-						},
-					  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
-						{
-						local dur = Human::interval_to_human_string(query_interval);
-						Reporter::info(fmt("%s received %d unique NULL answers to DNS queries against zones we don't whitelist in %s",
-									   key$host, result["NULL Answers"]$unique, dur));
-						NOTICE([$note=DNS_too_many_NULL_Answers,
-							   $src=key$host,
-							   $msg=fmt("%s received %d unique NULL answers to DNS queries against zones we don't whitelist in %s",
-										key$host, result["NULL Answers"]$unique, dur),
-							   $suppress_for=1mins,
-							   $identifier=cat(key$host)]);
-						}]);
-	}
+	                  $epoch = query_interval,
+	                  $reducers = set(null_reducer),
+	                  $threshold = null_answer_types_per_interval,
+	                  $threshold_val(key: SumStats::Key, result: SumStats::Result) =
+		                {
+		                return result["NULL Answers"]$unique+0.0;
+		                },
+	                  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
+		                {
+		                local dur = Human::interval_to_human_string(query_interval);
+		                Reporter::info(fmt("%s received %d unique NULL answers to DNS queries against zones we don't whitelist in %s",
+		                                    key$host, result["NULL Answers"]$unique, dur));
+		                NOTICE([$note=DNS_too_many_NULL_Answers,
+		                        $src=key$host,
+		                        $msg=fmt("%s received %d unique NULL answers to DNS queries against zones we don't whitelist in %s",
+		                                  key$host, result["NULL Answers"]$unique, dur),
+		                        $suppress_for=1mins,
+		                        $identifier=cat(key$host)]);
+		                }
+	                ]);
