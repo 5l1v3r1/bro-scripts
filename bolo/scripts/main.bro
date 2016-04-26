@@ -49,7 +49,7 @@ event dhcp_request(c: connection, msg: dhcp_msg, req_addr: addr, serv_addr: addr
 	if ( msg$h_addr in mac_addresses )
 		NOTICE([$note=MAC_Seen_In_DHCP_Request,
 				$msg=fmt("BOLO: %s spotted: %s (%s) has just requested a DHCP lease for %s.", 
-				         mac_addresses[msg$h_addr], msg$h_addr, host_name, req_addr),
+						 mac_addresses[msg$h_addr], msg$h_addr, host_name, req_addr),
 				$conn=c,
 				$suppress_for=1day,
 				$identifier=cat(msg$h_addr)]);
